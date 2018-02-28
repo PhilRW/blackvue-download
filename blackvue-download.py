@@ -4,11 +4,16 @@ import shutil
 import os
 
 import pathlib
+
+import datetime
 import requests
 import sys
 
+timeformat = "%Y-%m-%d %H:%M"
+
 if __name__ == '__main__':
 
+    print("Starting run at {0}".format(datetime.datetime.now().strftime(timeformat)))
     parser = argparse.ArgumentParser(description="Download files from BlackVue camera")
     parser.add_argument("host", help="the IP/hostname of the camera")
     parser.add_argument("destination", help="the download directory")
@@ -67,3 +72,5 @@ if __name__ == '__main__':
 
     except requests.exceptions.ConnectionError as e:
         print("Problem connecting to host {0}: {1}".format(args.host, e))
+
+    print("ending run at {0}".format(datetime.datetime.now().strftime(timeformat)))
