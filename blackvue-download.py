@@ -49,7 +49,7 @@ if __name__ == '__main__':
                     cam_files.append(basename + ".3gf")
                     cam_files.append(basename + ".gps")
 
-        for f in cam_files:
+        for f in sorted(cam_files):
             fn = f.split("/")[-1]
             y, m, d = fn[0:4], fn[4:6], fn[6:8]
             dest_dir = os.path.join(args.destination, y, m, d)
