@@ -56,14 +56,16 @@ if __name__ == '__main__':
             if not os.path.isfile(os.path.join(dest_dir, fn)):
                 dest = os.path.join(args.destination, fn)
                 print("downloading {0} to {1} ...".format(f, dest))
-                r = requests.get(base + f, stream=True)
-                with open(dest + ".tmp", 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+                try:
+                    r = requests.get(base + f, stream=True, timeout=5)
+                    with open(dest + ".tmp", 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
+                    pathlib.Path(dest_dir).mkdir(parents=True, exist_ok=True)
+                    os.rename(dest + ".tmp", os.path.join(dest_dir, fn))
 
-                pathlib.Path(dest_dir).mkdir(parents=True, exist_ok=True)
-                os.rename(dest + ".tmp", os.path.join(dest_dir, fn))
-
-                downloaded += 1
+                    downloaded += 1
+                except requests.exceptions.Timeout as e:
+                    print("... connection timed out while downloading: {0}".format(e))
             else:
                 print("file {0} already downloaded, skipping".format(fn))
                 skipped += 1
