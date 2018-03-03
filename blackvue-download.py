@@ -36,11 +36,6 @@ if __name__ == '__main__':
         logging.warning("destination directory {0} does not exist".format(args.destination))
         sys.exit(1)
 
-    response = os.system("ping -c 1 " + args.host)
-    if response != 0:
-        logging.warning("host {0} is down".format(args.host))
-        sys.exit(2)
-
     try:
         skipped = 0
         downloaded = 0
