@@ -35,6 +35,7 @@ if __name__ == '__main__':
     try:
         skipped = 0
         downloaded = 0
+        errored = 0
 
         result = requests.get(url)
 
@@ -64,15 +65,16 @@ if __name__ == '__main__':
                     os.rename(dest + ".tmp", os.path.join(dest_dir, fn))
 
                     downloaded += 1
-                except requests.exceptions.Timeout as e:
+                except TimeoutError as e:
                     print("... connection timed out while downloading: {0}".format(e))
+                    errored += 1
             else:
                 print("file {0} already downloaded, skipping".format(fn))
                 skipped += 1
 
-        print("{0} total, {1} skipped, {2} downloaded".format(len(cam_files), skipped, downloaded))
+        print("{0} total, {1} skipped, {2} downloaded, {3} errored".format(len(cam_files), skipped, downloaded, errored))
 
-    except requests.exceptions.ConnectionError as e:
+    except (requests.exceptions.ConnectionError, requests.packages.urllib3.exceptions.ReadTimeoutError) as e:
         print("Problem connecting to host {0}: {1}".format(args.host, e))
 
     print("---=== ending run at {0} ===---".format(datetime.datetime.now().strftime(timeformat)))
