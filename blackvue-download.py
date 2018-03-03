@@ -1,19 +1,28 @@
 import argparse
+import logging
 import shutil
 
 import os
 
 import pathlib
 
-import datetime
 import requests
 import sys
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+console = logging.StreamHandler(sys.stdout)
+console.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+root.addHandler(console)
 
 timeformat = "%Y-%m-%d %H:%M"
 
 if __name__ == '__main__':
 
-    print("---=== Starting run at {0} ===---".format(datetime.datetime.now().strftime(timeformat)))
+    logging.info("Starting run")
     parser = argparse.ArgumentParser(description="Download files from BlackVue camera")
     parser.add_argument("host", help="the IP/hostname of the camera")
     parser.add_argument("destination", help="the download directory")
@@ -24,12 +33,12 @@ if __name__ == '__main__':
     url = "{0}/blackvue_vod.cgi".format(base)
 
     if not os.path.isdir(args.destination):
-        print("destination directory {0} does not exist".format(args.destination))
+        logging.warning("destination directory {0} does not exist".format(args.destination))
         sys.exit(1)
 
     response = os.system("ping -c 1 " + args.host)
     if response != 0:
-        print("host {0} is down".format(args.host))
+        logging.warning("host {0} is down".format(args.host))
         sys.exit(2)
 
     try:
@@ -56,7 +65,7 @@ if __name__ == '__main__':
             dest_dir = os.path.join(args.destination, y, m, d)
             if not os.path.isfile(os.path.join(dest_dir, fn)):
                 dest = os.path.join(args.destination, fn)
-                print("downloading {0} to {1} ...".format(f, dest))
+                logging.info("downloading {0} to {1} ...".format(f, dest))
                 try:
                     r = requests.get(base + f, stream=True, timeout=5)
                     with open(dest + ".tmp", 'wb') as f:
@@ -66,15 +75,15 @@ if __name__ == '__main__':
 
                     downloaded += 1
                 except TimeoutError as e:
-                    print("... connection timed out while downloading: {0}".format(e))
+                    logging.error("... connection timed out while downloading: {0}".format(e))
                     errored += 1
             else:
-                print("file {0} already downloaded, skipping".format(fn))
+                logging.info("file {0} already downloaded, skipping".format(fn))
                 skipped += 1
 
-        print("{0} total, {1} skipped, {2} downloaded, {3} errored".format(len(cam_files), skipped, downloaded, errored))
+        logging.info("{0} total, {1} skipped, {2} downloaded, {3} errored".format(len(cam_files), skipped, downloaded, errored))
 
     except (requests.exceptions.ConnectionError, requests.packages.urllib3.exceptions.ReadTimeoutError) as e:
-        print("Problem connecting to host {0}: {1}".format(args.host, e))
+        logging.error("Problem connecting to host {0}: {1}".format(args.host, e))
 
-    print("---=== ending run at {0} ===---".format(datetime.datetime.now().strftime(timeformat)))
+    logging.info("ending run")
