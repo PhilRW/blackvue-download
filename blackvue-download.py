@@ -14,7 +14,7 @@ root.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler(sys.stdout)
 console.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
 root.addHandler(console)
 
