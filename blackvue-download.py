@@ -79,6 +79,6 @@ if __name__ == '__main__':
         logging.info("{0} total, {1} skipped, {2} downloaded, {3} errored".format(len(cam_files), skipped, downloaded, errored))
 
     except (requests.exceptions.ConnectionError, requests.packages.urllib3.exceptions.ReadTimeoutError) as e:
-        logging.error("Problem connecting to host {0}: {1}".format(args.host, e))
+        logging.warning("Problem connecting to host {0}: {1}".format(args.host, e))
 
     logging.info("ending run")
