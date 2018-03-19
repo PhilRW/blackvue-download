@@ -13,7 +13,7 @@ root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler(sys.stdout)
-console.setLevel(logging.DEBUG)
+console.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
 root.addHandler(console)
@@ -22,7 +22,7 @@ timeformat = "%Y-%m-%d %H:%M"
 
 if __name__ == '__main__':
 
-    logging.info("Starting run")
+    logging.debug("Starting run")
     parser = argparse.ArgumentParser(description="Download files from BlackVue camera")
     parser.add_argument("host", help="the IP/hostname of the camera")
     parser.add_argument("destination", help="the download directory")
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     url = "{0}/blackvue_vod.cgi".format(base)
 
     if not os.path.isdir(args.destination):
-        logging.warning("destination directory {0} does not exist".format(args.destination))
+        logging.error("destination directory {0} does not exist".format(args.destination))
         sys.exit(1)
 
     try:
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     logging.error("... connection timed out while downloading: {0}".format(e))
                     errored += 1
             else:
-                logging.info("file {0} already downloaded, skipping".format(fn))
+                logging.debug("file {0} already downloaded, skipping".format(fn))
                 skipped += 1
 
         logging.info("{0} total, {1} skipped, {2} downloaded, {3} errored".format(len(cam_files), skipped, downloaded, errored))
@@ -81,4 +81,4 @@ if __name__ == '__main__':
     except (requests.exceptions.ConnectionError, requests.packages.urllib3.exceptions.ReadTimeoutError) as e:
         logging.warning("Problem connecting to host {0}: {1}".format(args.host, e))
 
-    logging.info("ending run")
+    logging.debug("ending run")
