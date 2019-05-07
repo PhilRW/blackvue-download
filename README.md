@@ -2,7 +2,7 @@
 Download video files from BlackVue camera
 
 ## How to use
-Run the command and pass it two arguments: the destination directory and the IP/hostname of the camera.
+Run the python script and pass it two arguments: the destination directory and the IP/hostname of the camera.
 
 It will run continuously and will wait 5 minutes between trying to reach the host.
 
@@ -11,6 +11,12 @@ python ./blackvue-download.py /home/me/BlackVue 192.168.0.123
 ```
 
 The script will place the files in subfolders based on year, month, and day (YYYY/MM/DD).
+
+You may need to install the requirements first:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Docker
 
