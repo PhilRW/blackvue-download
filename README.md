@@ -23,3 +23,5 @@ pip install -r requirements.txt
 There is a Docker image available. Simply map a volume where you want it stored and pass the hostname/IP of the camera:
 
 `docker run -v /home/me/BlackVue:/data philrw/blackvue-download 192.168.0.123`
+
+If you don't map the [data volume](https://docs.docker.com/storage/), it will be anonymous.
