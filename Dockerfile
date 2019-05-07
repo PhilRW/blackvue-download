@@ -7,4 +7,4 @@ ADD blackvue-download.py /
 
 VOLUME [ "/data" ]
 
-ENTRYPOINT ["python", "./blackvue-download.py", "/data"]
+ENTRYPOINT [ "python", "./blackvue-download.py", "/data" ]
