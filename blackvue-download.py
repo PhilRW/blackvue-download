@@ -47,13 +47,12 @@ if __name__ == '__main__':
 
     while True:
 
-        skipped = 0
-        downloaded = 0
-        errored = 0
+        logging.debug("Starting run.")
 
+        skipped = 0
         try:
-            logging.info(f"Opening connection to {url}")
-            result = requests.get(url)
+            logging.info(f"Getting {url}")
+            result = requests.get(url, timeout=5)
 
             if result.status_code > 299:
                 raise ValueError(f"{result.status_code} {result.reason}")
@@ -94,11 +93,13 @@ if __name__ == '__main__':
             logging.info(f"{len(cam_files)} total, {skipped} skipped, {downloaded} downloaded, {errored} errored.")
 
         except requests.exceptions.ReadTimeout as rt:
-            logging.debug(f"Connection timeout to {args.host}: {rt}")
+            logging.info(f"Connection timeout to {args.host}: {rt}")
         except requests.exceptions.ConnectionError as ce:
             logging.warning(f"Cannot connect to {args.host}: {ce}")
         except ValueError as ve:
             logging.error(ve)
+        downloaded = 0
+        errored = 0
 
         logging.debug(f"Ending run, waiting {WAIT_TIME} seconds.")
         time.sleep(WAIT_TIME)
