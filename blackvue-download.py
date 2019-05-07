@@ -11,28 +11,23 @@ import requests
 
 WAIT_TIME = 300
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-
-console = logging.StreamHandler(sys.stdout)
-console.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(levelname)-10s - %(message)s')
-console.setFormatter(formatter)
-root.addHandler(console)
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)-10s - %(message)s',
+    level=logging.INFO
+)
 
 timeformat = "%Y-%m-%d %H:%M"
 
 
-def sig_handler(sgnl, frm):
-    if sgnl == signal.SIGTERM:
-        logging.debug("Caught SIGTERM.")
-    elif sgnl == signal.SIGINT:
-        logging.debug("Caught SIGINT.")
-    logging.info(f"Exiting program.")
+def sig_handler(signalnum, frame):
+    logging.debug(f"Caught signal {signalnum}: {frame}")
+    logging.info("Exiting program.")
     exit()
 
 
 if __name__ == '__main__':
+
+    logging.info("Running program.")
 
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
@@ -52,14 +47,16 @@ if __name__ == '__main__':
 
     while True:
 
-        logging.debug("Starting run.")
-
         skipped = 0
         downloaded = 0
         errored = 0
 
         try:
+            logging.info(f"Opening connection to {url}")
             result = requests.get(url)
+
+            if result.status_code > 299:
+                raise ValueError(f"{result.status_code} {result.reason}")
 
             content = result.content.splitlines()
             cam_files = []
@@ -87,17 +84,21 @@ if __name__ == '__main__':
                         os.rename(dest + ".tmp", os.path.join(dest_dir, fn))
 
                         downloaded += 1
-                    except TimeoutError as te:
-                        logging.error(f"Connection timed out while downloading: {te}")
+                    except TimeoutError as rt:
+                        logging.error(f"Connection timed out while downloading: {rt}")
                         errored += 1
                 else:
-                    logging.debug(f"File {fn} already downloaded, skipping.")
+                    logging.info(f"File {fn} already downloaded, skipping.")
                     skipped += 1
 
             logging.info(f"{len(cam_files)} total, {skipped} skipped, {downloaded} downloaded, {errored} errored.")
 
-        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as te:
-            logging.warning(f"Problem connecting to {args.host}: {te}")
+        except requests.exceptions.ReadTimeout as rt:
+            logging.debug(f"Connection timeout to {args.host}: {rt}")
+        except requests.exceptions.ConnectionError as ce:
+            logging.warning(f"Cannot connect to {args.host}: {ce}")
+        except ValueError as ve:
+            logging.error(ve)
 
         logging.debug(f"Ending run, waiting {WAIT_TIME} seconds.")
         time.sleep(WAIT_TIME)
