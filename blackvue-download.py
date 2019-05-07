@@ -50,6 +50,9 @@ if __name__ == '__main__':
         logging.debug("Starting run.")
 
         skipped = 0
+        downloaded = 0
+        errored = 0
+
         try:
             logging.info(f"Getting {url}")
             result = requests.get(url, timeout=5)
@@ -98,8 +101,6 @@ if __name__ == '__main__':
             logging.warning(f"Cannot connect to {args.host}: {ce}")
         except ValueError as ve:
             logging.error(ve)
-        downloaded = 0
-        errored = 0
 
         logging.debug(f"Ending run, waiting {WAIT_TIME} seconds.")
         time.sleep(WAIT_TIME)
