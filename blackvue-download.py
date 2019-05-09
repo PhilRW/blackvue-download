@@ -9,12 +9,14 @@ import time
 
 import requests
 
-WAIT_TIME = 300
-
 logging.basicConfig(
     format='%(asctime)s - %(levelname)-10s - %(message)s',
-    level=logging.INFO
 )
+
+DEFAULT_LOG_LEVEL = "INFO"
+DEFAULT_WAIT_TIME = 300
+
+logger = logging.getLogger(__name__)
 
 timeformat = "%Y-%m-%d %H:%M"
 
@@ -27,34 +29,38 @@ def sig_handler(signalnum, frame):
 
 if __name__ == '__main__':
 
-    logging.info("Running program.")
-
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
 
     parser = argparse.ArgumentParser(description="Download files from BlackVue camera")
     parser.add_argument("destination", help="the download directory")
     parser.add_argument("host", help="the IP/hostname of the camera")
+    parser.add_argument("--wait_time", default=os.environ.get("WAIT_TIME", DEFAULT_WAIT_TIME))
+    parser.add_argument("--log_level", default=os.environ.get("LOG_LEVEL", DEFAULT_LOG_LEVEL))
 
     args = parser.parse_args()
+
+    logger.setLevel(args.log_level)
+
+    logger.info("Running program.")
 
     base = "http://" + args.host
     url = f"{base}/blackvue_vod.cgi"
 
     if not os.path.isdir(args.destination):
-        logging.error(f"Destination directory {args.destination} does not exist.")
+        logger.error(f"Destination directory {args.destination} does not exist.")
         sys.exit(1)
 
     while True:
 
-        logging.debug("Starting run.")
+        logger.debug("Starting run.")
 
         skipped = 0
         downloaded = 0
         errored = 0
 
         try:
-            logging.info(f"Getting {url}")
+            logger.info(f"Getting {url}")
             result = requests.get(url, timeout=5)
 
             if result.status_code > 299:
@@ -77,7 +83,7 @@ if __name__ == '__main__':
                 dest_dir = os.path.join(args.destination, y, m, d)
                 if not os.path.isfile(os.path.join(dest_dir, fn)):
                     dest = os.path.join(args.destination, fn)
-                    logging.info(f"Downloading {f} to {dest} ...")
+                    logger.info(f"Downloading {f} to {dest} ...")
                     try:
                         r = requests.get(base + f, stream=True, timeout=5)
                         with open(dest + ".tmp", 'wb') as f:
@@ -87,20 +93,20 @@ if __name__ == '__main__':
 
                         downloaded += 1
                     except TimeoutError as rt:
-                        logging.error(f"Connection timed out while downloading: {rt}")
+                        logger.error(f"Connection timed out while downloading: {rt}")
                         errored += 1
                 else:
-                    logging.info(f"File {fn} already downloaded, skipping.")
+                    logger.info(f"File {fn} already downloaded, skipping.")
                     skipped += 1
 
-            logging.info(f"{len(cam_files)} total, {skipped} skipped, {downloaded} downloaded, {errored} errored.")
+            logger.info(f"{len(cam_files)} total, {skipped} skipped, {downloaded} downloaded, {errored} errored.")
 
         except requests.exceptions.ReadTimeout as rt:
-            logging.info(f"Connection timeout to {args.host}: {rt}")
+            logger.info(f"Connection timeout to {args.host}: {rt}")
         except requests.exceptions.ConnectionError as ce:
-            logging.warning(f"Cannot connect to {args.host}: {ce}")
+            logger.warning(f"Cannot connect to {args.host}: {ce}")
         except ValueError as ve:
-            logging.error(ve)
+            logger.error(ve)
 
-        logging.debug(f"Ending run, waiting {WAIT_TIME} seconds.")
-        time.sleep(WAIT_TIME)
+        logger.debug(f"Ending run, waiting {args.wait_time} seconds.")
+        time.sleep(int(args.wait_time))
