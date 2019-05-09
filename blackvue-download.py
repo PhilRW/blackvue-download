@@ -102,7 +102,7 @@ if __name__ == '__main__':
             logger.info(f"{len(cam_files)} total, {skipped} skipped, {downloaded} downloaded, {errored} errored.")
 
         except requests.exceptions.ReadTimeout as rt:
-            logger.info(f"Connection timeout to {args.host}: {rt}")
+            logger.warning(f"Connection timeout to {args.host}: {rt}")
         except requests.exceptions.ConnectionError as ce:
             logger.warning(f"Cannot connect to {args.host}: {ce}")
         except ValueError as ve:
