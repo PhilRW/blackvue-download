@@ -15,6 +15,7 @@ logging.basicConfig(
 
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_WAIT_TIME = 300
+HTTP_TIMEOUT = 13
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ if __name__ == '__main__':
                     dest = os.path.join(args.destination, fn)
                     logger.info(f"Downloading {f} to {dest} ...")
                     try:
-                        r = requests.get(base + f, stream=True, timeout=5)
+                        r = requests.get(base + f, stream=True, timeout=HTTP_TIMEOUT)
                         with open(dest + ".tmp", 'wb') as f:
                             shutil.copyfileobj(r.raw, f)
                         pathlib.Path(dest_dir).mkdir(parents=True, exist_ok=True)
