@@ -108,6 +108,8 @@ if __name__ == '__main__':
             logger.warning(f"Cannot connect to {args.host}: {ce}")
         except ValueError as ve:
             logger.error(ve)
+        except urllib3.exceptions.ReadTimeoutError as te:
+            logger.error(te)
 
         logger.debug(f"Ending run, waiting {args.wait_time} seconds.")
         time.sleep(int(args.wait_time))
